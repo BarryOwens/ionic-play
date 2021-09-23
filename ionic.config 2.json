@@ -1,7 +1,0 @@
-{
-  "name": "workplace-companion-app",
-  "integrations": {
-    "capacitor": {}
-  },
-  "type": "angular"
-}

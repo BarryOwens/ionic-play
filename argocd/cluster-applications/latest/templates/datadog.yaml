@@ -1,0 +1,38 @@
+{{ if and (eq .Values.clusterName  "ahx-rtls") (eq .Values.region  "ie-db") }}
+apiVersion: "argoproj.io/v1alpha1"
+kind: "Application"
+metadata:
+  name: "cluster-{{ .Values.clusterName }}-datadog"
+  namespace: {{ .Values.argoNamespace }}
+  finalizers:
+  - "resources-finalizer.argocd.argoproj.io"
+  labels:
+    clusterName: {{ .Values.clusterName }}
+    region: {{ .Values.region }}
+    environment: {{ .Values.environment }}
+    workspace: {{ .Values.workspace }}
+spec:
+  project: {{ .Values.argoProject }}
+  source:
+    helm:
+      # provide default (defined in values.yaml) and cluster-specific values (defined as a file inside /cluster-overrides)
+      # which are combined into .Values.datadog
+      values: |
+{{ toYaml .Values.datadog | indent 8 }}
+      parameters:
+        # Extra annotation to be added with our controlled version, so we can force redeploy by increasing our chart version
+        - name: "podAnnotations.app\\.kubernetes\\.io/part-of"
+          value: "{{ .Chart.Name }}-{{ .Chart.Version }}"
+      # rename the installed "app" as simply datadog
+      releaseName: datadog
+    # Install from the official datadog chart, located in the datadog repository
+    chart: datadog
+    repoURL: https://helm.datadoghq.com
+    targetRevision: 2.22.1
+  destination:
+    # Install datadog to the datadog namespace of the target cluster
+    server: {{ .Values.clusterEndpoint }}
+    namespace: kube-system
+  syncPolicy:
+    automated: {}
+{{ end }}

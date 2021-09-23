@@ -1,0 +1,116 @@
+## Default values for Datadog Agent
+## See Datadog helm documentation to learn more:
+## https://docs.datadoghq.com/agent/kubernetes/helm/
+
+# nameOverride -- Override name of app
+nameOverride:  # ""
+
+# fullnameOverride -- Override the full qualified app name
+fullnameOverride:  # ""
+
+# targetSystem -- Target OS for this deployment (possible values: linux, windows)
+targetSystem: "linux"
+
+# registry -- Registry to use for all Agent images (default gcr.io)
+## Currently we offer Datadog Agent images on:
+## GCR - use gcr.io/datadoghq (default)
+## DockerHub - use docker.io/datadog
+## AWS - use public.ecr.aws/datadog
+registry: gcr.io/datadoghq
+
+datadog:
+  envFrom:
+    - secretRef:
+        name: datadog-secrets # API key is in here
+    - configMapRef:
+        name: datadog-default-config
+    - configMapRef:
+        name: datadog-custom-config
+
+  # kubelet configuration
+  kubelet:
+    tlsVerify: false
+  ## Enable logs agent and provide custom configs
+  logs:
+    # datadog.logs.enabled -- Enables this to activate Datadog Agent log collection
+    ## ref: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#log-collection-setup
+    enabled: true
+
+    # datadog.logs.containerCollectAll -- Enable this to allow log collection for all containers
+    ## ref: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#log-collection-setup
+    containerCollectAll: true
+
+    # datadog.logs.containerCollectUsingFiles -- Collect logs from files in /var/log/pods instead of using container runtime API
+    ## It's usually the most efficient way of collecting logs.
+    ## ref: https://docs.datadoghq.com/agent/basic_agent_usage/kubernetes/#log-collection-setup
+    containerCollectUsingFiles: true
+
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+
+agents:
+  containers:
+    agent:
+      requests:
+        cpu: 200m
+        memory: 256Mi
+      limits:
+        cpu: 200m
+        memory: 256Mi
+
+    processAgent:
+      requests:
+        cpu: 100m
+        memory: 200Mi
+      limits:
+        cpu: 100m
+        memory: 200Mi
+
+    traceAgent:
+      requests:
+        cpu: 100m
+        memory: 200Mi
+      limits:
+        cpu: 100m
+        memory: 200Mi
+
+    systemProbe:
+      requests:
+        cpu: 100m
+        memory: 200Mi
+      limits:
+        cpu: 100m
+        memory: 200Mi
+
+    securityAgent:
+      requests:
+        cpu: 100m
+        memory: 200Mi
+      limits:
+        cpu: 100m
+        memory: 200Mi
+
+    initContainers:
+      # agents.containers.initContainers.resources -- Resource requests and limits for the init containers
+      resources: {}
+      requests:
+        cpu: 100m
+        memory: 200Mi
+      limits:
+        cpu: 100m
+        memory: 200Mi
+
+kube-state-metrics:
+  requests:
+    cpu: 200m
+    memory: 256Mi
+  limits:
+    cpu: 200m
+    memory: 256Mi
+
+
